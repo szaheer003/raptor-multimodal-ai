@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Raptor × PwC — Multimodal AI Agent for Contact Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Georgia:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── PwC Design Tokens ─────────────────────────────────── */
+    :root {
+      --pwc-orange:     #D04A02;
+      --pwc-orange-lt:  #E8651A;
+      --pwc-red:        #E0301E;
+      --pwc-black:      #1A1A1A;
+      --pwc-charcoal:   #21201F;
+      --pwc-dark:       #2D2D2D;
+      --pwc-mid:        #3D3D3D;
+      --pwc-grey:       #6B6B6B;
+      --pwc-light:      #F2F2F2;
+      --pwc-white:      #FFFFFF;
+      --pwc-rule:       rgba(208,74,2,0.35);
+      --heading-font:   Georgia, 'Times New Roman', serif;
+      --body-font:      'Inter', system-ui, sans-serif;
+      --section-pad:    80px 60px;
+      --max-w:          1200px;
+      --radius:         4px;
+      --transition:     0.3s ease;
+    }
+
+    /* ─── Reset & Base ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: var(--body-font);
+      background: var(--pwc-black);
+      color: var(--pwc-white);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { color: var(--pwc-orange); text-decoration: none; }
+    a:hover { color: var(--pwc-orange-lt); }
+
+    /* ─── Navigation ────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px;
+      height: 64px;
+      background: rgba(26,26,26,0.97);
+      border-bottom: 1px solid var(--pwc-rule);
+      backdrop-filter: blur(12px);
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .nav-logo .pwc-mark {
+      width: 48px;
+      height: 32px;
+      display: flex;
+      gap: 4px;
+      align-items: flex-end;
+    }
+    .pwc-mark span {
+      display: block;
+      width: 10px;
+      border-radius: 2px 2px 0 0;
+    }
+    .pwc-mark span:nth-child(1) { height: 32px; background: #D04A02; }
+    .pwc-mark span:nth-child(2) { height: 22px; background: #E0301E; }
+    .pwc-mark span:nth-child(3) { height: 14px; background: #E88D14; }
+    .pwc-mark span:nth-child(4) { height: 26px; background: #AD1B02; }
+    .nav-logo .brand {
+      font-family: var(--body-font);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--pwc-white);
+    }
+    .nav-logo .brand em { color: var(--pwc-orange); font-style: normal; }
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.65);
+      letter-spacing: 0.04em;
+      transition: color var(--transition);
+    }
+    .nav-links a:hover { color: var(--pwc-orange); }
+    .nav-cta {
+      background: var(--pwc-orange);
+      color: var(--pwc-white) !important;
+      padding: 8px 20px;
+      border-radius: var(--radius);
+      font-weight: 600 !important;
+      font-size: 13px;
+      transition: background var(--transition) !important;
+    }
+    .nav-cta:hover { background: var(--pwc-orange-lt) !important; color: var(--pwc-white) !important; }
+
+    /* ─── Section Helpers ───────────────────────────────────── */
+    .section { position: relative; overflow: hidden; }
+    .container { max-width: var(--max-w); margin: 0 auto; }
+    .section-label {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--pwc-orange);
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: var(--heading-font);
+      font-size: clamp(28px, 3.5vw, 44px);
+      font-weight: 400;
+      line-height: 1.2;
+      color: var(--pwc-white);
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 16px;
+      color: rgba(255,255,255,0.6);
+      max-width: 680px;
+    }
+    .divider {
+      width: 48px; height: 3px;
+      background: var(--pwc-orange);
+      margin: 20px 0 40px;
+      border-radius: 2px;
+    }
+
+    /* ─── 1. HERO ────────────────────────────────────────────── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 100px 60px 80px;
+      background:
+        linear-gradient(135deg, rgba(208,74,2,0.12) 0%, transparent 50%),
+        var(--pwc-charcoal);
+      position: relative;
+    }
+    #hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 80% at 100% 50%, rgba(208,74,2,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+    .hero-eyebrow {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--pwc-orange);
+      margin-bottom: 20px;
+    }
+    .hero-title {
+      font-family: var(--heading-font);
+      font-size: clamp(36px, 4.5vw, 60px);
+      font-weight: 400;
+      line-height: 1.12;
+      color: var(--pwc-white);
+      margin-bottom: 24px;
+    }
+    .hero-title em { color: var(--pwc-orange); font-style: normal; }
+    .hero-sub {
+      font-size: 17px;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 16px;
+      line-height: 1.7;
+    }
+    .hero-meta {
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.05em;
+      margin-bottom: 40px;
+    }
+    .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+    .btn {
+      display: inline-block;
+      padding: 13px 28px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      transition: all var(--transition);
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--pwc-orange);
+      color: var(--pwc-white);
+    }
+    .btn-primary:hover {
+      background: var(--pwc-orange-lt);
+      color: var(--pwc-white);
+      transform: translateY(-1px);
+    }
+    .btn-outline {
+      border: 1px solid rgba(255,255,255,0.25);
+      color: rgba(255,255,255,0.8);
+      background: transparent;
+    }
+    .btn-outline:hover {
+      border-color: var(--pwc-orange);
+      color: var(--pwc-orange);
+    }
+
+    /* Hero right panel */
+    .hero-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 40px;
+      position: relative;
+    }
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--pwc-orange), var(--pwc-red));
+      border-radius: 8px 8px 0 0;
+    }
+    .hero-kpi-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 8px;
+    }
+    .kpi-block { text-align: center; }
+    .kpi-num {
+      font-family: var(--heading-font);
+      font-size: 36px;
+      font-weight: 400;
+      color: var(--pwc-orange);
+      line-height: 1;
+    }
+    .kpi-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+    .kpi-sep {
+      grid-column: 1/-1;
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+    }
+    .hero-card-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 28px;
+    }
+
+    /* ─── 2. EVA SECTION ────────────────────────────────────── */
+    #eva {
+      padding: var(--section-pad);
+      background: var(--pwc-black);
+    }
+    .eva-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .eva-capabilities {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .cap-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-left: 3px solid var(--pwc-orange);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .cap-card:hover {
+      background: rgba(208,74,2,0.07);
+      border-color: var(--pwc-orange-lt);
+    }
+    .cap-icon {
+      font-size: 22px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .cap-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--pwc-white);
+      line-height: 1.4;
+    }
+
+    /* EVA visual */
+    .eva-visual {
+      position: relative;
+    }
+    .eva-orb-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+    .eva-orb {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, var(--pwc-orange-lt), var(--pwc-orange) 40%, #8B2000 80%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 0 60px rgba(208,74,2,0.4),
+        0 0 120px rgba(208,74,2,0.15);
+      position: relative;
+    }
+    .eva-orb::after {
+      content: '';
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      border: 1px solid rgba(208,74,2,0.3);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.06); opacity: 0.5; }
+    }
+    .eva-initials {
+      font-family: var(--heading-font);
+      font-size: 48px;
+      color: var(--pwc-white);
+      font-weight: 400;
+      letter-spacing: 0.05em;
+    }
+    .eva-tagline {
+      text-align: center;
+      font-family: var(--heading-font);
+      font-size: 20px;
+      color: rgba(255,255,255,0.8);
+      font-style: italic;
+      margin-bottom: 8px;
+    }
+    .eva-desc {
+      text-align: center;
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      max-width: 340px;
+      margin: 0 auto;
+    }
+
+    /* ─── 3. ROADMAP SECTION ────────────────────────────────── */
+    #roadmap {
+      padding: var(--section-pad);
+      background: var(--pwc-charcoal);
+    }
+    .roadmap-header { margin-bottom: 48px; }
+    .roadmap-badge {
+      display: inline-block;
+      background: rgba(208,74,2,0.15);
+      border: 1px solid rgba(208,74,2,0.3);
+      color: var(--pwc-orange);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    .roadmap-timeline {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr) 1.2fr;
+      gap: 0;
+      position: relative;
+    }
+    .roadmap-timeline::before {
+      content: '';
+      position: absolute;
+      top: 28px;
+      left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--pwc-orange), rgba(208,74,2,0.2));
+    }
+    .phase {
+      position: relative;
+      padding: 56px 20px 24px;
+      border-right: 1px solid rgba(255,255,255,0.05);
+    }
+    .phase:last-child { border-right: none; }
+    .phase-dot {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 3px solid var(--pwc-orange);
+      background: var(--pwc-charcoal);
+      z-index: 2;
+    }
+    .phase-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--pwc-orange);
+      margin-bottom: 8px;
+    }
+    .phase-title {
+      font-family: var(--heading-font);
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--pwc-white);
+      margin-bottom: 16px;
+      line-height: 1.3;
+    }
+    .phase-items {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .phase-items li {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      padding-left: 12px;
+      position: relative;
+      line-height: 1.5;
+    }
+    .phase-items li::before {
+      content: '›';
+      position: absolute;
+      left: 0;
+      color: var(--pwc-orange);
+    }
+    .phase.ops {
+      background: rgba(208,74,2,0.06);
+      border: 1px solid rgba(208,74,2,0.15);
+      border-radius: var(--radius);
+    }
+    .phase.ops .phase-label { color: #E88D14; }
+    .cadence-strip {
+      margin-top: 32px;
+      padding: 16px 24px;
+      background: rgba(208,74,2,0.08);
+      border-left: 3px solid var(--pwc-orange);
+      border-radius: var(--radius);
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+    }
+    .cadence-strip strong { color: var(--pwc-orange); }
+
+    /* ─── 4. DELIVERY APPROACH ──────────────────────────────── */
+    #delivery {
+      padding: var(--section-pad);
+      background: var(--pwc-black);
+    }
+    .delivery-intro {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      margin-bottom: 56px;
+      align-items: start;
+    }
+    .delivery-statement {
+      font-family: var(--heading-font);
+      font-size: 20px;
+      font-style: italic;
+      color: rgba(255,255,255,0.75);
+      line-height: 1.6;
+      border-left: 3px solid var(--pwc-orange);
+      padding-left: 24px;
+    }
+    .agentic-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .tag {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.6);
+    }
+    .tag.highlight {
+      border-color: rgba(208,74,2,0.4);
+      background: rgba(208,74,2,0.08);
+      color: var(--pwc-orange);
+    }
+
+    /* Process flow */
+    .process-flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0;
+      position: relative;
+      margin-bottom: 48px;
+    }
+    .process-flow::before {
+      content: '';
+      position: absolute;
+      top: 36px;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--pwc-orange), rgba(208,74,2,0.15));
+    }
+    .proc-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 12px;
+      text-align: center;
+    }
+    .proc-num {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 2px solid var(--pwc-orange);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--heading-font);
+      font-size: 24px;
+      color: var(--pwc-orange);
+      margin-bottom: 16px;
+      background: var(--pwc-black);
+      position: relative;
+      z-index: 2;
+    }
+    .proc-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--pwc-white);
+      line-height: 1.4;
+    }
+    .proc-sub {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    /* Engineering tables */
+    .eng-tables {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .eng-table {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .eng-table-header {
+      background: rgba(208,74,2,0.12);
+      border-bottom: 1px solid rgba(208,74,2,0.2);
+      padding: 14px 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--pwc-orange);
+    }
+    .eng-table-body {
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .eng-table-body span {
+      font-size: 13px;
+      color: rgba(255,255,255,0.65);
+      padding-left: 12px;
+      position: relative;
+    }
+    .eng-table-body span::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: var(--pwc-orange);
+      font-size: 10px;
+    }
+
+    /* Hardening row */
+    .hardening-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .hardening-chip {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-top: 3px solid var(--pwc-red);
+      border-radius: var(--radius);
+      padding: 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+    }
+
+    /* ─── 5. POC SECTION ────────────────────────────────────── */
+    #poc {
+      padding: var(--section-pad);
+      background: var(--pwc-charcoal);
+    }
+    .poc-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-top: 48px;
+    }
+    .poc-item {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 6px;
+      padding: 28px;
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .poc-item:hover {
+      border-color: rgba(208,74,2,0.3);
+      background: rgba(208,74,2,0.05);
+    }
+    .poc-num {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--pwc-orange);
+      color: var(--pwc-white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--heading-font);
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .poc-content-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--pwc-white);
+      margin-bottom: 6px;
+    }
+    .poc-content-body {
+      font-size: 13px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.6;
+    }
+
+    /* ─── 6. THANK YOU / CTA ────────────────────────────────── */
+    #closing {
+      padding: var(--section-pad);
+      background: var(--pwc-charcoal);
+      border-top: 1px solid var(--pwc-rule);
+      text-align: center;
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+    }
+    .closing-wrap { width: 100%; }
+    .closing-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--pwc-orange);
+      margin-bottom: 24px;
+    }
+    .closing-title {
+      font-family: var(--heading-font);
+      font-size: clamp(40px, 5vw, 72px);
+      font-weight: 400;
+      color: var(--pwc-white);
+      margin-bottom: 16px;
+    }
+    .closing-sub {
+      font-size: 16px;
+      color: rgba(255,255,255,0.5);
+      max-width: 520px;
+      margin: 0 auto 40px;
+    }
+    .closing-actions { display: flex; justify-content: center; gap: 16px; }
+    .closing-rule {
+      width: 60px;
+      height: 3px;
+      background: var(--pwc-orange);
+      margin: 24px auto;
+      border-radius: 2px;
+    }
+
+    /* ─── Footer ────────────────────────────────────────────── */
+    footer {
+      background: var(--pwc-black);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 24px 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-conf {
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      max-width: 500px;
+      line-height: 1.6;
+    }
+    .footer-mark {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.4);
+    }
+    .footer-mark em { color: var(--pwc-orange); font-style: normal; }
+
+    /* ─── Scroll reveal ─────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    /* ─── Responsive ────────────────────────────────────────── */
+    @media (max-width: 960px) {
+      :root { --section-pad: 60px 32px; }
+      nav { padding: 0 24px; }
+      .nav-links { display: none; }
+      .hero-grid, .eva-grid, .delivery-intro { grid-template-columns: 1fr; gap: 40px; }
+      .roadmap-timeline { grid-template-columns: 1fr 1fr; }
+      .process-flow { grid-template-columns: 1fr 1fr 1fr; }
+      .hardening-row { grid-template-columns: 1fr 1fr; }
+      .poc-grid { grid-template-columns: 1fr; }
+      .eng-tables { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 16px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── NAVIGATION ──────────────────────────────────────────── -->
+  <nav>
+    <div class="nav-logo">
+      <div class="pwc-mark">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <div class="brand"><em>PwC</em> × Raptor</div>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#eva">EVA</a></li>
+      <li><a href="#roadmap">Roadmap</a></li>
+      <li><a href="#delivery">Delivery</a></li>
+      <li><a href="#poc">POC</a></li>
+      <li><a href="#closing" class="nav-cta">Get Started</a></li>
+    </ul>
+  </nav>
+
+  <!-- ─── 1. HERO ─────────────────────────────────────────────── -->
+  <section id="hero" class="section">
+    <div class="container hero-grid">
+      <div>
+        <p class="hero-eyebrow">PwC × Raptor — April 2026</p>
+        <h1 class="hero-title">
+          Multimodal AI Agent<br />for <em>Contact Center</em><br />& Beyond
+        </h1>
+        <p class="hero-sub">
+          A technology approach discussion on deploying EVA — Raptor's always-on
+          AI companion — across all support channels.
+        </p>
+        <p class="hero-meta">Technology Approach Discussion &nbsp;·&nbsp; April 2026</p>
+        <div class="hero-actions">
+          <a href="#eva" class="btn btn-primary">Meet EVA</a>
+          <a href="#roadmap" class="btn btn-outline">View Roadmap</a>
+        </div>
+      </div>
+      <div>
+        <div class="hero-card">
+          <p class="hero-card-title">Deployment at a Glance</p>
+          <div class="hero-kpi-grid">
+            <div class="kpi-block">
+              <div class="kpi-num">6–9</div>
+              <div class="kpi-label">Months to full-capability deployment</div>
+            </div>
+            <div class="kpi-block">
+              <div class="kpi-num">16–20</div>
+              <div class="kpi-label">Week release cadence delivering continuous value</div>
+            </div>
+            <div class="kpi-sep"></div>
+            <div class="kpi-block">
+              <div class="kpi-num">4</div>
+              <div class="kpi-label">Phased releases with built-in change management</div>
+            </div>
+            <div class="kpi-block">
+              <div class="kpi-num">100%</div>
+              <div class="kpi-label">End-to-end resolution without human involvement</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 2. EVA ──────────────────────────────────────────────── -->
+  <section id="eva" class="section">
+    <div style="padding: var(--section-pad);">
+      <div class="container eva-grid">
+        <div>
+          <span class="section-label">Meet EVA</span>
+          <h2 class="section-title reveal">
+            Raptor's always-on AI companion that solves problems instantly
+          </h2>
+          <div class="divider"></div>
+          <p class="section-sub reveal reveal-delay-1">
+            EVA makes interactions effortless across all support needs — proactively,
+            intelligently, and without boundaries.
+          </p>
+          <div class="eva-capabilities reveal reveal-delay-2">
+            <div class="cap-card">
+              <span class="cap-icon">🌐</span>
+              <div class="cap-title">Proactively engages, multimodally across interfaces</div>
+            </div>
+            <div class="cap-card">
+              <span class="cap-icon">🔒</span>
+              <div class="cap-title">Enforces security, privacy, and access controls</div>
+            </div>
+            <div class="cap-card">
+              <span class="cap-icon">🧠</span>
+              <div class="cap-title">Learns and improves with every interaction</div>
+            </div>
+            <div class="cap-card">
+              <span class="cap-icon">🤝</span>
+              <div class="cap-title">Coaches, personalizes, and hands off seamlessly</div>
+            </div>
+            <div class="cap-card">
+              <span class="cap-icon">📱</span>
+              <div class="cap-title">"Lives" across channels, including 'in the product'</div>
+            </div>
+            <div class="cap-card">
+              <span class="cap-icon">⚡</span>
+              <div class="cap-title">Resolves end-to-end without human involvement</div>
+            </div>
+          </div>
+        </div>
+        <div class="eva-visual reveal">
+          <div class="eva-orb-wrap">
+            <div class="eva-orb">
+              <span class="eva-initials">EVA</span>
+            </div>
+          </div>
+          <p class="eva-tagline">Always on. Always ready.</p>
+          <p class="eva-desc">
+            An intelligent agent embedded across every touchpoint — from chat to voice
+            to in-product support.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 3. ROADMAP ──────────────────────────────────────────── -->
+  <section id="roadmap" class="section">
+    <div style="padding: var(--section-pad);">
+      <div class="container">
+        <div class="roadmap-header">
+          <span class="section-label">Deployment Roadmap</span>
+          <h2 class="section-title reveal">
+            Domain-centric deployment quickly scales full capability in 6–9 months
+          </h2>
+          <div class="divider"></div>
+          <div class="roadmap-badge">Value every 16–20 weeks · Change management built-in</div>
+        </div>
+
+        <div class="roadmap-timeline reveal">
+          <div class="phase">
+            <div class="phase-dot"></div>
+            <div class="phase-label">Phase 0</div>
+            <div class="phase-title">Planning, Architecture Design & MVP</div>
+            <ul class="phase-items">
+              <li>Confirm tech stack and prioritize service areas</li>
+              <li>Define capability system layers</li>
+              <li>Design target architecture</li>
+              <li>MVP for 1–2 service areas, full human-in-the-loop</li>
+            </ul>
+          </div>
+          <div class="phase">
+            <div class="phase-dot"></div>
+            <div class="phase-label">Release 1</div>
+            <div class="phase-title">MVP to Production</div>
+            <ul class="phase-items">
+              <li>Deploy MVP to production</li>
+              <li>Stand up governance, thresholds, and guardrails</li>
+              <li>Establish AI Ops team and observability tooling</li>
+              <li>Validate against baseline metrics</li>
+            </ul>
+          </div>
+          <div class="phase">
+            <div class="phase-dot"></div>
+            <div class="phase-label">Release 2</div>
+            <div class="phase-title">Expanded Domains</div>
+            <ul class="phase-items">
+              <li>Expand to 2–3 additional service areas</li>
+              <li>Extend knowledge platform to new domains</li>
+              <li>Reduce human oversight progressively</li>
+              <li>Onboard model tuners and QA specialists</li>
+            </ul>
+          </div>
+          <div class="phase">
+            <div class="phase-dot"></div>
+            <div class="phase-label">Release 3</div>
+            <div class="phase-title">Global Release</div>
+            <ul class="phase-items">
+              <li>Unify intake and fulfillment across workflows</li>
+              <li>Deepen personalization</li>
+              <li>Continue legacy volume migration</li>
+              <li>Scale across all remaining service areas</li>
+              <li>Mature agent deployment and tuning model</li>
+              <li>Retire legacy queues and processes</li>
+            </ul>
+          </div>
+          <div class="phase ops">
+            <div class="phase-dot" style="border-color:#E88D14;"></div>
+            <div class="phase-label" style="color:#E88D14;">Ongoing</div>
+            <div class="phase-title">Transition to Ops + Managed Services</div>
+            <ul class="phase-items">
+              <li>Continuous tuning, refinement, and QA</li>
+              <li>Workforce transition support</li>
+              <li>Recalibrate onshore/offshore mix over time</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="cadence-strip reveal">
+          <strong>Value drops every 16–20 weeks</strong> — with change management built into each release cycle, ensuring adoption keeps pace with capability.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 4. DELIVERY APPROACH ─────────────────────────────────── -->
+  <section id="delivery" class="section">
+    <div style="padding: var(--section-pad);">
+      <div class="container">
+        <span class="section-label">Delivery Model</span>
+        <h2 class="section-title reveal">Digital & Agentic Tech Delivery Approach</h2>
+        <div class="divider"></div>
+
+        <div class="delivery-intro reveal">
+          <div>
+            <p class="delivery-statement">
+              "Agentic AI development is highly iterative, layering in early iterations to augment traditional development approaches."
+            </p>
+          </div>
+          <div>
+            <div class="agentic-tags">
+              <span class="tag highlight">Agentic Dev Iterations</span>
+              <span class="tag">Exploration &amp; Reimagination</span>
+              <span class="tag">Solution Definition</span>
+              <span class="tag">Release Cycles</span>
+              <span class="tag highlight">Hardening Cycle</span>
+              <span class="tag">LLMOps &amp; Observability</span>
+              <span class="tag">Multi-Modal</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="process-flow reveal">
+          <div class="proc-step">
+            <div class="proc-num">1</div>
+            <div class="proc-label">Exploration &amp; Reimagination</div>
+            <div class="proc-sub">Reframe the problem space</div>
+          </div>
+          <div class="proc-step">
+            <div class="proc-num">2</div>
+            <div class="proc-label">Solution Definition</div>
+            <div class="proc-sub">Architecture &amp; scope locked</div>
+          </div>
+          <div class="proc-step">
+            <div class="proc-num">3</div>
+            <div class="proc-label">Solution Design &amp; Definition</div>
+            <div class="proc-sub">Detailed design &amp; data integration</div>
+          </div>
+          <div class="proc-step">
+            <div class="proc-num">4</div>
+            <div class="proc-label">Development, Testing &amp; Hardening</div>
+            <div class="proc-sub">Build, test, and validate</div>
+          </div>
+          <div class="proc-step">
+            <div class="proc-num">5</div>
+            <div class="proc-label">Deployment &amp; Transition</div>
+            <div class="proc-sub">Solution deployed to production</div>
+          </div>
+        </div>
+
+        <div class="eng-tables reveal">
+          <div class="eng-table">
+            <div class="eng-table-header">Agentic Delivery Cycle</div>
+            <div class="eng-table-body">
+              <span>Agentic Engineering</span>
+              <span>Domain Skill Development</span>
+              <span>Contextualization &amp; Synthesis</span>
+              <span>Agent Evaluation</span>
+              <span>Agentic / LLMOps incl. Observability</span>
+              <span>Multi-Modal Integration</span>
+            </div>
+          </div>
+          <div class="eng-table">
+            <div class="eng-table-header">Core Engineering Delivery</div>
+            <div class="eng-table-body">
+              <span>Developed Code &amp; Code Reviews</span>
+              <span>Unit Testing</span>
+              <span>Product Owner Validation</span>
+              <span>Context Modelling</span>
+              <span>Data Integration</span>
+              <span>App Dev &amp; Process Design</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hardening-row reveal">
+          <div class="hardening-chip">Resiliency &amp; Recovery</div>
+          <div class="hardening-chip">Behavior Drift Analysis</div>
+          <div class="hardening-chip">Usability Tests</div>
+          <div class="hardening-chip">Guardrails</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 5. POC ───────────────────────────────────────────────── -->
+  <section id="poc" class="section">
+    <div style="padding: var(--section-pad);">
+      <div class="container">
+        <span class="section-label">Proof of Concept</span>
+        <h2 class="section-title reveal">
+          What we need to deliver a POC tailor-made for Raptor
+        </h2>
+        <div class="divider"></div>
+        <p class="section-sub reveal">
+          Four foundational inputs enable PwC to build and validate EVA in a
+          non-production environment within weeks.
+        </p>
+        <div class="poc-grid">
+          <div class="poc-item reveal reveal-delay-1">
+            <div class="poc-num">1</div>
+            <div>
+              <div class="poc-content-title">SME Availability</div>
+              <div class="poc-content-body">
+                One support lead from Raptor (US) available for weekly reviews
+                during the POC build — the single most critical input.
+              </div>
+            </div>
+          </div>
+          <div class="poc-item reveal reveal-delay-2">
+            <div class="poc-num">2</div>
+            <div>
+              <div class="poc-content-title">Sandbox Environment</div>
+              <div class="poc-content-body">
+                Non-prod access to R6 Chat so we can build and test without
+                touching live support infrastructure.
+              </div>
+            </div>
+          </div>
+          <div class="poc-item reveal reveal-delay-3">
+            <div class="poc-num">3</div>
+            <div>
+              <div class="poc-content-title">Knowledge Content</div>
+              <div class="poc-content-body">
+                Existing FAQs, help articles, and agent resolution scripts to
+                seed EVA's knowledge base with Raptor-specific intelligence.
+              </div>
+            </div>
+          </div>
+          <div class="poc-item reveal reveal-delay-4">
+            <div class="poc-num">4</div>
+            <div>
+              <div class="poc-content-title">Top Ticket Sample</div>
+              <div class="poc-content-body">
+                500–1,000 real cases from the highest-volume issue types
+                (login, StudentSafe, account access) to train and validate EVA.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 6. CLOSING ──────────────────────────────────────────── -->
+  <section id="closing" class="section">
+    <div class="closing-wrap">
+      <p class="closing-eyebrow">Raptor × PwC · April 2026</p>
+      <div class="closing-rule"></div>
+      <h2 class="closing-title">Thank you.</h2>
+      <p class="closing-sub">
+        Confidential information for the sole internal benefit and use of PwC's client.
+      </p>
+      <div class="closing-actions">
+        <a href="#hero" class="btn btn-primary">Back to Top</a>
+        <a href="#poc" class="btn btn-outline">POC Requirements</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ───────────────────────────────────────────────── -->
+  <footer>
+    <p class="footer-conf">
+      © 2026 PricewaterhouseCoopers LLP. Confidential — for the sole internal benefit and use of PwC's client. Not for redistribution.
+    </p>
+    <div class="footer-mark"><em>PwC</em> × Raptor</div>
+  </footer>
+
+  <!-- ─── SCROLL REVEAL SCRIPT ────────────────────────────────── -->
+  <script>
+    const revealEls = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(el => observer.observe(el));
+
+    // Active nav link highlighting
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-links a');
+    const navObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          navLinks.forEach(link => {
+            link.style.color = link.getAttribute('href') === `#${id}`
+              ? 'var(--pwc-orange)'
+              : '';
+          });
+        }
+      });
+    }, { threshold: 0.4 });
+    sections.forEach(s => navObserver.observe(s));
+  </script>
+
+</body>
+</html>
