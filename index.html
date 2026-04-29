@@ -8,6 +8,132 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Georgia:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
+    /* ─── Password Gate ─────────────────────────────────────── */
+    #gate {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: var(--pwc-charcoal, #21201F);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    #gate.unlocked {
+      animation: gateOut 0.4s ease forwards;
+      pointer-events: none;
+    }
+    @keyframes gateOut {
+      to { opacity: 0; transform: scale(1.03); }
+    }
+    .gate-card {
+      width: 360px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 40px;
+      text-align: center;
+      position: relative;
+    }
+    .gate-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #D04A02, #E0301E);
+      border-radius: 8px 8px 0 0;
+    }
+    .gate-logo {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      align-items: flex-end;
+      margin-bottom: 24px;
+    }
+    .gate-logo span {
+      display: block;
+      width: 10px;
+      border-radius: 2px 2px 0 0;
+    }
+    .gate-logo span:nth-child(1) { height: 32px; background: #D04A02; }
+    .gate-logo span:nth-child(2) { height: 22px; background: #E0301E; }
+    .gate-logo span:nth-child(3) { height: 14px; background: #E88D14; }
+    .gate-logo span:nth-child(4) { height: 26px; background: #AD1B02; }
+    .gate-title {
+      font-family: Georgia, serif;
+      font-size: 22px;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .gate-sub {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 28px;
+      letter-spacing: 0.04em;
+    }
+    .gate-input-wrap { position: relative; margin-bottom: 12px; }
+    .gate-input {
+      width: 100%;
+      padding: 12px 44px 12px 16px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 4px;
+      color: #fff;
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.1em;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .gate-input:focus { border-color: #D04A02; }
+    .gate-input.error { border-color: #E0301E; animation: shake 0.35s ease; }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%,60% { transform: translateX(-6px); }
+      40%,80% { transform: translateX(6px); }
+    }
+    .gate-toggle {
+      position: absolute;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: rgba(255,255,255,0.35);
+      font-size: 16px;
+      padding: 0;
+      line-height: 1;
+    }
+    .gate-toggle:hover { color: rgba(255,255,255,0.7); }
+    .gate-err {
+      font-size: 12px;
+      color: #E0301E;
+      margin-bottom: 16px;
+      min-height: 16px;
+    }
+    .gate-btn {
+      width: 100%;
+      padding: 13px;
+      background: #D04A02;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .gate-btn:hover { background: #E8651A; }
+    .gate-conf {
+      margin-top: 24px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+      line-height: 1.6;
+    }
+
     /* ─── PwC Design Tokens ─────────────────────────────────── */
     :root {
       --pwc-orange:     #D04A02;
@@ -776,6 +902,31 @@
 </head>
 <body>
 
+  <!-- ─── PASSWORD GATE ─────────────────────────────────────────── -->
+  <div id="gate">
+    <div class="gate-card">
+      <div class="gate-logo">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <h1 class="gate-title">Raptor × PwC</h1>
+      <p class="gate-sub">CONFIDENTIAL &nbsp;·&nbsp; ENTER ACCESS CODE</p>
+      <div class="gate-input-wrap">
+        <input
+          id="gate-pw"
+          class="gate-input"
+          type="password"
+          placeholder="Password"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button class="gate-toggle" id="gate-eye" aria-label="Show/hide password">👁</button>
+      </div>
+      <p class="gate-err" id="gate-err"></p>
+      <button class="gate-btn" id="gate-submit">Enter</button>
+      <p class="gate-conf">For authorised recipients only. Do not forward or distribute.</p>
+    </div>
+  </div>
+
   <!-- ─── NAVIGATION ──────────────────────────────────────────── -->
   <nav>
     <div class="nav-logo">
@@ -1146,6 +1297,90 @@
     </p>
     <div class="footer-mark"><em>PwC</em> × Raptor</div>
   </footer>
+
+  <!-- ─── PASSWORD GATE SCRIPT ───────────────────────────────── -->
+  <script>
+    (function () {
+      const HASH = '5e042d18dde094fe226d8c4826fbda70'; // md5("raptorffg")
+      const SESSION_KEY = 'raptor_auth';
+
+      function md5(s) {
+        // Compact MD5 implementation
+        function safeAdd(x, y) { var lsw=(x&0xffff)+(y&0xffff); return (((x>>16)+(y>>16)+(lsw>>16))<<16)|(lsw&0xffff); }
+        function bitRotateLeft(n, c) { return (n<<c)|(n>>>(32-c)); }
+        function md5cmn(q,a,b,x,s,t) { return safeAdd(bitRotateLeft(safeAdd(safeAdd(a,q),safeAdd(x,t)),s),b); }
+        function md5ff(a,b,c,d,x,s,t) { return md5cmn((b&c)|((~b)&d),a,b,x,s,t); }
+        function md5gg(a,b,c,d,x,s,t) { return md5cmn((b&d)|(c&(~d)),a,b,x,s,t); }
+        function md5hh(a,b,c,d,x,s,t) { return md5cmn(b^c^d,a,b,x,s,t); }
+        function md5ii(a,b,c,d,x,s,t) { return md5cmn(c^(b|(~d)),a,b,x,s,t); }
+        var m = [];
+        for (var i=0;i<s.length;i++) m[i>>2]|=(s.charCodeAt(i)&0xff)<<((i%4)*8);
+        m[s.length>>2]|=0x80<<((s.length%4)*8);
+        m[(((s.length+8)>>6)<<4)+14]=s.length*8;
+        var n=m.length, state=[1732584193,-271733879,-1732584194,271733878], i;
+        for (i=0;i<n;i+=16) {
+          var a=state[0],b=state[1],c=state[2],d=state[3];
+          a=md5ff(a,b,c,d,m[i+0],7,-680876936);d=md5ff(d,a,b,c,m[i+1],12,-389564586);c=md5ff(c,d,a,b,m[i+2],17,606105819);b=md5ff(b,c,d,a,m[i+3],22,-1044525330);
+          a=md5ff(a,b,c,d,m[i+4],7,-176418897);d=md5ff(d,a,b,c,m[i+5],12,1200080426);c=md5ff(c,d,a,b,m[i+6],17,-1473231341);b=md5ff(b,c,d,a,m[i+7],22,-45705983);
+          a=md5ff(a,b,c,d,m[i+8],7,1770035416);d=md5ff(d,a,b,c,m[i+9],12,-1958414417);c=md5ff(c,d,a,b,m[i+10],17,-42063);b=md5ff(b,c,d,a,m[i+11],22,-1990404162);
+          a=md5ff(a,b,c,d,m[i+12],7,1804603682);d=md5ff(d,a,b,c,m[i+13],12,-40341101);c=md5ff(c,d,a,b,m[i+14],17,-1502002290);b=md5ff(b,c,d,a,m[i+15],22,1236535329);
+          a=md5gg(a,b,c,d,m[i+1],5,-165796510);d=md5gg(d,a,b,c,m[i+6],9,-1069501632);c=md5gg(c,d,a,b,m[i+11],14,643717713);b=md5gg(b,c,d,a,m[i+0],20,-373897302);
+          a=md5gg(a,b,c,d,m[i+5],5,-701558691);d=md5gg(d,a,b,c,m[i+10],9,38016083);c=md5gg(c,d,a,b,m[i+15],14,-660478335);b=md5gg(b,c,d,a,m[i+4],20,-405537848);
+          a=md5gg(a,b,c,d,m[i+9],5,568446438);d=md5gg(d,a,b,c,m[i+14],9,-1019803690);c=md5gg(c,d,a,b,m[i+3],14,-187363961);b=md5gg(b,c,d,a,m[i+8],20,1163531501);
+          a=md5gg(a,b,c,d,m[i+13],5,-1444681467);d=md5gg(d,a,b,c,m[i+2],9,-51403784);c=md5gg(c,d,a,b,m[i+7],14,1735328473);b=md5gg(b,c,d,a,m[i+12],20,-1926607734);
+          a=md5hh(a,b,c,d,m[i+5],4,-378558);d=md5hh(d,a,b,c,m[i+8],11,-2022574463);c=md5hh(c,d,a,b,m[i+11],16,1839030562);b=md5hh(b,c,d,a,m[i+14],23,-35309556);
+          a=md5hh(a,b,c,d,m[i+1],4,-1530992060);d=md5hh(d,a,b,c,m[i+4],11,1272893353);c=md5hh(c,d,a,b,m[i+7],16,-155497632);b=md5hh(b,c,d,a,m[i+10],23,-1094730640);
+          a=md5hh(a,b,c,d,m[i+13],4,681279174);d=md5hh(d,a,b,c,m[i+0],11,-358537222);c=md5hh(c,d,a,b,m[i+3],16,-722521979);b=md5hh(b,c,d,a,m[i+6],23,76029189);
+          a=md5hh(a,b,c,d,m[i+9],4,-640364487);d=md5hh(d,a,b,c,m[i+12],11,-421815835);c=md5hh(c,d,a,b,m[i+15],16,530742520);b=md5hh(b,c,d,a,m[i+2],23,-995338651);
+          a=md5ii(a,b,c,d,m[i+0],6,-198630844);d=md5ii(d,a,b,c,m[i+7],10,1126891415);c=md5ii(c,d,a,b,m[i+14],15,-1416354905);b=md5ii(b,c,d,a,m[i+5],21,-57434055);
+          a=md5ii(a,b,c,d,m[i+12],6,1700485571);d=md5ii(d,a,b,c,m[i+3],10,-1894986606);c=md5ii(c,d,a,b,m[i+10],15,-1051523);b=md5ii(b,c,d,a,m[i+1],21,-2054922799);
+          a=md5ii(a,b,c,d,m[i+8],6,1873313359);d=md5ii(d,a,b,c,m[i+15],10,-30611744);c=md5ii(c,d,a,b,m[i+6],15,-1560198380);b=md5ii(b,c,d,a,m[i+13],21,1309151649);
+          a=md5ii(a,b,c,d,m[i+4],6,-145523070);d=md5ii(d,a,b,c,m[i+11],10,-1120210379);c=md5ii(c,d,a,b,m[i+2],15,718787259);b=md5ii(b,c,d,a,m[i+9],21,-343485551);
+          state[0]=safeAdd(a,state[0]);state[1]=safeAdd(b,state[1]);state[2]=safeAdd(c,state[2]);state[3]=safeAdd(d,state[3]);
+        }
+        var hex='';
+        for(var j=0;j<4;j++){var w=state[j];for(var k=0;k<4;k++){hex+=('0'+((w&0xff).toString(16))).slice(-2);w>>=8;}}
+        return hex;
+      }
+
+      var gate = document.getElementById('gate');
+      var input = document.getElementById('gate-pw');
+      var btn = document.getElementById('gate-submit');
+      var err = document.getElementById('gate-err');
+      var eye = document.getElementById('gate-eye');
+      var visible = false;
+
+      // Skip gate if already authenticated this session
+      if (sessionStorage.getItem(SESSION_KEY) === '1') {
+        gate.style.display = 'none';
+      }
+
+      function unlock() {
+        var val = input.value;
+        if (md5(val) === HASH) {
+          sessionStorage.setItem(SESSION_KEY, '1');
+          gate.classList.add('unlocked');
+          setTimeout(function () { gate.style.display = 'none'; }, 420);
+        } else {
+          err.textContent = 'Incorrect password. Please try again.';
+          input.classList.add('error');
+          input.value = '';
+          setTimeout(function () { input.classList.remove('error'); }, 400);
+        }
+      }
+
+      btn.addEventListener('click', unlock);
+      input.addEventListener('keydown', function (e) { if (e.key === 'Enter') unlock(); });
+      eye.addEventListener('click', function () {
+        visible = !visible;
+        input.type = visible ? 'text' : 'password';
+        eye.textContent = visible ? '🙈' : '👁';
+      });
+
+      // Focus the input once fonts load
+      window.addEventListener('load', function () { input.focus(); });
+    })();
+  </script>
 
   <!-- ─── SCROLL REVEAL SCRIPT ────────────────────────────────── -->
   <script>
